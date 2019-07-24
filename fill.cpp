@@ -5,7 +5,8 @@
 
 int main()
 {
-	std::cout << "topology: 2 3 1" << std::endl;
+	freopen("testDataRand.txt","w", stdout);
+	std::cout << "topology: 2 300 300 1" << std::endl;
 	for (int i = 2000; i >= 0; i--)
 	{
 		int n1 = (int)(2.0 * rand() / double(RAND_MAX));
@@ -15,4 +16,6 @@ int main()
 		std::cout << "in: " << n1 << ".0 " << n2 << ".0" << std::endl;
 		std::cout << "out: " << t << ".0 " << std::endl;
 	}
+	
+	return 0;
 }
