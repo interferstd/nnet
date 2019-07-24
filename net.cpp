@@ -1,4 +1,5 @@
-#include "trainingSet.h"
+#include <cmath>
+#include <cassert>
 #include "neuron.h"
 #include "net.h"
 
@@ -48,7 +49,7 @@ void Net::fit(const Data& target)
 		error += delta * delta;
 	}
 	error /= outputLayer.size() - 1; 
-	error = sqrt(error);
+	error = ::sqrt(error);
 
 	recentAvgError =
 		(recentAvgError * recentAvgSmoothingFactor + error)
@@ -77,6 +78,12 @@ void Net::fit(const Data& target)
 			layer[n].updateInputWeights(prevLayer);
 		}
 	}
+}
+
+void Net::fit(const Data &input, const Data &target)
+{
+	this->predict(input);
+	this->fit(target);
 }
 
 void Net::predict(const Data& input)

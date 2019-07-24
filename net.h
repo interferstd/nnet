@@ -9,6 +9,7 @@ public:
 	Net(const Topology &topology);
 	void predict(const Data &input);
 	void fit(const Data &target);
+	void fit(const Data &input, const Data &target);
 	void getRecentResults(Data &result) const;
 	double getRecentAvgError() const { return recentAvgError; }
 private:

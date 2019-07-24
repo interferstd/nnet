@@ -1,11 +1,11 @@
-#include "trainingSet.h"
+#include "trainingdata.h"
 
-TrainingSet::TrainingSet(const std::string filename)
+TrainingData::TrainingData(const std::string filename)
 {
 	trainingDataFile.open(filename.c_str());
 }
 
-void TrainingSet::getTopology(std::vector<unsigned>& topology)
+void TrainingData::getTopology(Topology& topology)
 {
 	std::string line;
 	std::string label;
@@ -13,15 +13,15 @@ void TrainingSet::getTopology(std::vector<unsigned>& topology)
 	std::getline(trainingDataFile, line);
 	std::stringstream ss(line);
 	ss >> label;
-	
 	if (!this->isEOF() && label.compare("topology:") == 0)
 	{
 		unsigned n;
 		do { ss >> n; topology.push_back(n); } while (!ss.eof());
-	} else abort();
+	}
+	else assert(!this->isEOF() && label.compare("topology:") == 0);
 }
 
-unsigned TrainingSet::getInput(std::vector<double>& input)
+unsigned TrainingData::getInput(Data& input)
 {
 	input.clear();
 
@@ -40,7 +40,7 @@ unsigned TrainingSet::getInput(std::vector<double>& input)
 	return input.size();
 }
 
-unsigned TrainingSet::getTarget(std::vector<double>& target)
+unsigned TrainingData::getTarget(Data& target)
 {
 	target.clear();
 
@@ -57,4 +57,24 @@ unsigned TrainingSet::getTarget(std::vector<double>& target)
 	}
 
 	return target.size();
+}
+
+void TrainList::colectData(TrainingData& trainingData)
+{
+	TrainEpoch epoch;
+	while (trainingData.getInput(epoch.input), trainingData.getTarget(epoch.target), !trainingData.isEOF())
+	{
+		epoches.push_back(epoch);
+	}
+}
+
+void TrainList::repeatData(TrainFunction trainFunction, unsigned n)
+{
+	for (unsigned it = 0; it < n; ++it)
+	{
+		for (auto& epoch: epoches)
+		{
+			trainFunction(epoch);
+		}
+	}
 }
