@@ -10,7 +10,7 @@ void showVector(std::string label, std::vector<double> &v)
 
 int main()
 {
-	TrainingData trainingData("testData.txt");
+	TrainingData trainingData("testData.data");
 	Topology topology;
 	trainingData.getTopology(topology);
 	Net net(topology);

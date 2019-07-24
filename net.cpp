@@ -40,7 +40,7 @@ void Net::getRecentResults(Data& result) const
 
 void Net::fit(const Data& target)
 {
-	Layer &outputLayer = layers.back();
+	Layer& outputLayer = layers.back();
 	error = 0.0;
 
 	for (unsigned n = 0; n < outputLayer.size() - 1; ++n)
@@ -48,7 +48,7 @@ void Net::fit(const Data& target)
 		double delta = target[n] - outputLayer[n].getOutput();
 		error += delta * delta;
 	}
-	error /= outputLayer.size() - 1; 
+	error /= outputLayer.size() - 1;
 	error = ::sqrt(error);
 
 	recentAvgError =
@@ -62,28 +62,22 @@ void Net::fit(const Data& target)
 
 	for (unsigned layerIndex = layers.size() - 2; layerIndex > 0; --layerIndex)
 	{
-		Layer &hiddenLayer = layers[layerIndex];
-		Layer &nextLayer = layers[layerIndex + 1];
+		Layer& hiddenLayer = layers[layerIndex];
+		Layer& nextLayer = layers[layerIndex + 1];
 
 		for (auto& hidenNeuron: hiddenLayer) hidenNeuron.calcHiddenGradients(nextLayer);
 	}
 
 	for (unsigned layerIndex = layers.size() - 1; layerIndex > 0; --layerIndex)
 	{
-		Layer &layer = layers[layerIndex];
-		Layer &prevLayer = layers[layerIndex - 1];
+		Layer& layer = layers[layerIndex];
+		Layer& prevLayer = layers[layerIndex - 1];
 
 		for (unsigned n = 0; n < layer.size() - 1; ++n)
 		{
 			layer[n].updateInputWeights(prevLayer);
 		}
 	}
-}
-
-void Net::fit(const Data &input, const Data &target)
-{
-	this->predict(input);
-	this->fit(target);
 }
 
 void Net::predict(const Data& input)
@@ -97,12 +91,18 @@ void Net::predict(const Data& input)
 
 	for (unsigned layerIndex = 1; layerIndex < layers.size(); ++layerIndex)
 	{
-		Layer &prevLayer = layers[layerIndex - 1];
+		Layer& prevLayer = layers[layerIndex - 1];
 		for (unsigned n = 0; n < layers[layerIndex].size() - 1; ++n)
 		{
 			layers[layerIndex][n].predict(prevLayer);
 		}
 	}
+}
+
+void Net::fit(const Data& input, const Data& target)
+{
+	this->predict(input);
+	this->fit(target);
 }
 
 unsigned Net::setDump(std::string name)

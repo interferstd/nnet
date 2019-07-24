@@ -9,11 +9,11 @@
 class Net
 {
 public:
-	Net(const Topology &topology);
-	void predict(const Data &input);
-	void fit(const Data &target);
-	void fit(const Data &input, const Data &target);
-	void getRecentResults(Data &result) const;
+	Net(const Topology& topology);
+	void predict(const Data& input);
+	void fit(const Data& target);
+	void fit(const Data& input, const Data& target);
+	void getRecentResults(Data& result) const;
 	double getRecentAvgError() const { return recentAvgError; }
 	unsigned setDump(std::string name);
 	unsigned getDump(std::string name);
