@@ -67,6 +67,21 @@ void Neuron::predict(const Layer &prevLayer)
 	output = Neuron::activation.getFunction()(sum);
 }
 
+void Neuron::setDump(std::fstream& dumpFile)
+{
+	dumpFile << index_ << ' ' << outputWeights.size() << ' ';
+	for (Connection& connect: outputWeights) dumpFile << connect.weight << ' ' << connect.deltaWeight << ' ';
+	dumpFile << '\n';
+}
+
+void Neuron::getDump(std::fstream& loadFile)
+{
+	unsigned lenght;
+	loadFile >> index_ >> lenght;
+	outputWeights.resize(lenght);
+	for (Connection& connect: outputWeights) loadFile >> connect.weight >> connect.deltaWeight;
+}
+
 
 double SigmoidFunction(double x)
 {

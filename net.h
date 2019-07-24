@@ -1,5 +1,8 @@
 #pragma once
 #include <vector>
+#include <fstream>
+#include <string>
+#include <iomanip>
 #include "data.h"
 #include "neuron.h"
 
@@ -12,6 +15,8 @@ public:
 	void fit(const Data &input, const Data &target);
 	void getRecentResults(Data &result) const;
 	double getRecentAvgError() const { return recentAvgError; }
+	unsigned setDump(std::string name);
+	unsigned getDump(std::string name);
 private:
 	std::vector<Layer> layers; // layers[layerNumber][NeuronNumber]
 	double error;

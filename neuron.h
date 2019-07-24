@@ -2,6 +2,7 @@
 #include <vector>
 #include <cstdlib>
 #include <functional>
+#include <fstream>
 
 class Neuron;
 
@@ -9,11 +10,11 @@ typedef std::vector<Neuron> Layer;
 
 typedef std::function<double(double)> Function;
 
-struct Connection
+typedef struct
 {
 	double weight;
 	double deltaWeight;
-};
+} Connection;
 
 class Activation{
 public:
@@ -41,6 +42,8 @@ public:
 	void calcOutputGradients(double targetVals);
 	void calcHiddenGradients(const Layer &nextLayer);
 	void updateInputWeights(Layer &prevLayer);
+	void setDump(std::fstream& dumpFile);
+	void getDump(std::fstream& loadFile);
 private:
 	static double learning_rate;
 	static double alpha;

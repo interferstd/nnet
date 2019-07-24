@@ -104,3 +104,35 @@ void Net::predict(const Data& input)
 		}
 	}
 }
+
+unsigned Net::setDump(std::string name)
+{
+	std::fstream dumpFile(name, std::ios::out);
+	if (!dumpFile.is_open()) return false;
+	dumpFile.precision(16);
+	dumpFile << layers.size() << '\n';
+	for (auto& layer: layers)
+	{
+		dumpFile << layer.size() << '\n';
+		for (auto& neuron: layer) neuron.setDump(dumpFile);
+	}
+	dumpFile.close();
+	return true;
+}
+
+unsigned Net::getDump(std::string name)
+{
+	std::fstream loadFile(name, std::ios::in);
+	if (!loadFile.is_open()) return false;
+	unsigned lenght;
+	loadFile >> lenght;
+	layers.resize(lenght);
+	for (auto& layer: layers)
+	{
+		loadFile >> lenght;
+		layer.resize(lenght, Neuron(0, 0));
+		for (auto& neuron: layer) neuron.getDump(loadFile);
+	}
+	loadFile.close();
+	return true;
+}
