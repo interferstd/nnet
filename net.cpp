@@ -3,76 +3,74 @@
 #include "net.h"
 
 
-double net::recentAverageSmoothingFactor = 100.0; // Number of training samples to average over
+double Net::recentAvgSmoothingFactor = 100.0; // Number of training samples to average over
 
-net::net(const std::vector<unsigned> &topology)
+Net::Net(const Topology& topology)
 {
 	unsigned numLayers = topology.size();
-	for (unsigned layerNum = 0; layerNum < numLayers; ++layerNum) {
+	layers.reserve(numLayers);
+	
+	for (unsigned layerIndex = 0; layerIndex < numLayers; ++layerIndex)
+	{
 		layers.push_back(Layer());
-		unsigned numOutputs = layerNum == topology.size() - 1 ? 0 : topology[layerNum + 1];
+		unsigned numOutputs = layerIndex == topology.size() - 1 ? 0 : topology[layerIndex + 1];
+		unsigned numNerons = topology[layerIndex];
 
-
-		for (unsigned neuronNum = 0; neuronNum <= topology[layerNum]; ++neuronNum) {
-			layers.back().push_back(neuron(numOutputs, neuronNum));
+		layers.back().reserve(numNerons);
+		for (unsigned neuronIndex = 0; neuronIndex <= numNerons; ++neuronIndex)
+		{
+			layers.back().push_back(Neuron(numOutputs, neuronIndex));
 		}
 
-		layers.back().back().setOutputVal(1.0);
+		layers.back().back().setOutput(1.0);
 	}
 }
 
-
-void net::getResults(std::vector<double> &resultVals) const
+void Net::getRecentResults(Data& result) const
 {
-	resultVals.clear();
+	result.clear();
+	result.reserve(layers.back().size());
 
 	for (unsigned n = 0; n < layers.back().size() - 1; ++n)
 	{
-		resultVals.push_back(layers.back()[n].getOutputVal());
+		result.push_back(layers.back()[n].getOutput());
 	}
 }
 
-void net::backProp(const std::vector<double> &targetVals)
+void Net::fit(const Data& target)
 {
-
 	Layer &outputLayer = layers.back();
 	error = 0.0;
 
 	for (unsigned n = 0; n < outputLayer.size() - 1; ++n)
 	{
-		double delta = targetVals[n] - outputLayer[n].getOutputVal();
+		double delta = target[n] - outputLayer[n].getOutput();
 		error += delta * delta;
 	}
 	error /= outputLayer.size() - 1; 
-	error = sqrt(error); 
+	error = sqrt(error);
 
-
-	recentAverageError =
-		(recentAverageError * recentAverageSmoothingFactor + error)
-		/ (recentAverageSmoothingFactor + 1.0);
-
+	recentAvgError =
+		(recentAvgError * recentAvgSmoothingFactor + error)
+		/ (recentAvgSmoothingFactor + 1.0);
 
 	for (unsigned n = 0; n < outputLayer.size() - 1; ++n)
 	{
-		outputLayer[n].calcOutputGradients(targetVals[n]);
+		outputLayer[n].calcOutputGradients(target[n]);
 	}
 
-	for (unsigned layerNum = layers.size() - 2; layerNum > 0; --layerNum)
+	for (unsigned layerIndex = layers.size() - 2; layerIndex > 0; --layerIndex)
 	{
-		Layer &hiddenLayer = layers[layerNum];
-		Layer &nextLayer = layers[layerNum + 1];
+		Layer &hiddenLayer = layers[layerIndex];
+		Layer &nextLayer = layers[layerIndex + 1];
 
-		for (unsigned n = 0; n < hiddenLayer.size(); ++n)
-		{
-			hiddenLayer[n].calcHiddenGradients(nextLayer);
-		}
+		for (auto& hidenNeuron: hiddenLayer) hidenNeuron.calcHiddenGradients(nextLayer);
 	}
 
-
-	for (unsigned layerNum = layers.size() - 1; layerNum > 0; --layerNum)
+	for (unsigned layerIndex = layers.size() - 1; layerIndex > 0; --layerIndex)
 	{
-		Layer &layer = layers[layerNum];
-		Layer &prevLayer = layers[layerNum - 1];
+		Layer &layer = layers[layerIndex];
+		Layer &prevLayer = layers[layerIndex - 1];
 
 		for (unsigned n = 0; n < layer.size() - 1; ++n)
 		{
@@ -81,19 +79,21 @@ void net::backProp(const std::vector<double> &targetVals)
 	}
 }
 
-void net::feedForward(const std::vector<double> &inputVals)
+void Net::predict(const Data& input)
 {
-	assert(inputVals.size() == layers[0].size() - 1);
+	assert(input.size() == layers[0].size() - 1);
 
-	for (unsigned i = 0; i < inputVals.size(); ++i) {
-		layers[0][i].setOutputVal(inputVals[i]);
+	for (unsigned i = 0; i < input.size(); ++i)
+	{
+		layers[0][i].setOutput(input[i]);
 	}
 
-	for (unsigned layerNum = 1; layerNum < layers.size(); ++layerNum) {
-		Layer &prevLayer = layers[layerNum - 1];
-		for (unsigned n = 0; n < layers[layerNum].size() - 1; ++n) {
-			layers[layerNum][n].feedForward(prevLayer);
+	for (unsigned layerIndex = 1; layerIndex < layers.size(); ++layerIndex)
+	{
+		Layer &prevLayer = layers[layerIndex - 1];
+		for (unsigned n = 0; n < layers[layerIndex].size() - 1; ++n)
+		{
+			layers[layerIndex][n].predict(prevLayer);
 		}
 	}
 }
-

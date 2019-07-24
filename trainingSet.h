@@ -6,15 +6,16 @@
 #include <cmath>
 #include <fstream>
 #include <sstream>
+#include "data.h"
 
-class trainingSet
+class TrainingSet
 {
 public:
-	trainingSet(const std::string filename);
+	TrainingSet(const std::string filename);
 	bool isEOF() { return trainingDataFile.eof(); }
-	void getTopology(std::vector<unsigned> &topology);
-	unsigned getNextInputs(std::vector<double> &inputVals);
-	unsigned getTargetOutputs(std::vector<double> &targetOutputVals);
+	void getTopology(Topology& topology);
+	unsigned getInput(Data& input);
+	unsigned getTarget(Data& target);
 private:
 	std::ifstream trainingDataFile;
 };

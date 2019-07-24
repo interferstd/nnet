@@ -1,19 +1,19 @@
 #pragma once
 #include <vector>
+#include "data.h"
+#include "neuron.h"
 
-
-
-class net
+class Net
 {
 public:
-	net(const std::vector<unsigned> &topology);
-	void feedForward(const std::vector<double> &inputVals);
-	void backProp(const std::vector<double> &targetVals);
-	void getResults(std::vector<double> &resultVals) const;
-	double getRecentAverageError() const { return recentAverageError; }
+	Net(const Topology &topology);
+	void predict(const Data &input);
+	void fit(const Data &target);
+	void getRecentResults(Data &result) const;
+	double getRecentAvgError() const { return recentAvgError; }
 private:
-	std::vector<Layer> layers;//layers[layerNumber][NeuronNumber]
+	std::vector<Layer> layers; // layers[layerNumber][NeuronNumber]
 	double error;
-	double recentAverageError;
-	static double recentAverageSmoothingFactor;
+	double recentAvgError;
+	static double recentAvgSmoothingFactor;
 };

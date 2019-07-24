@@ -2,33 +2,35 @@
 #include <cmath>
 
 
-double neuron::eta = 0.15; // net learning rate
-double neuron::alpha = 0.5; // momentum
+double Neuron::learning_rate = 0.15;
+double Neuron::alpha = 0.5; // momentum
+Activation Neuron::activation;
 
- neuron::neuron(unsigned numOutputs, unsigned myIndex)
+ Neuron::Neuron(unsigned numOutputs, unsigned index)
 {
-	for (unsigned c = 0; c < numOutputs; ++c) {
+	outputWeights.reserve(numOutputs);
+	for (unsigned c = 0; c < numOutputs; ++c)
+	{
 		outputWeights.push_back(Connection());
 		outputWeights.back().weight = randomWeight();
 	}
 
-	m_myIndex = myIndex;
+	index_ = index;
 }
 
-void neuron::updateInputWeights(Layer &prevLayer)
+void Neuron::updateInputWeights(Layer &prevLayer)
 {
-	for (unsigned n = 0; n < prevLayer.size(); ++n)
+	for (auto& neuron: prevLayer)
 	{
-		neuron &neuron = prevLayer[n];
-		double oldDeltaWeight = neuron.outputWeights[m_myIndex].deltaWeight;
+		double oldDeltaWeight = neuron.outputWeights[index_].deltaWeight;
 
-		double newDeltaWeight = eta * neuron.getOutputVal() * gradient + alpha * oldDeltaWeight;
-		neuron.outputWeights[m_myIndex].deltaWeight = newDeltaWeight;
-		neuron.outputWeights[m_myIndex].weight += newDeltaWeight;
+		double newDeltaWeight = learning_rate * neuron.getOutput() * gradient + alpha * oldDeltaWeight;
+		neuron.outputWeights[index_].deltaWeight = newDeltaWeight;
+		neuron.outputWeights[index_].weight += newDeltaWeight;
 	}
 }
 
-double neuron::sumDOW(const Layer &nextLayer) const
+double Neuron::sumDOW(const Layer &nextLayer) const
 {
 	double sum = 0.0;
 
@@ -40,37 +42,61 @@ double neuron::sumDOW(const Layer &nextLayer) const
 	return sum;
 }
 
-void neuron::calcHiddenGradients(const Layer &nextLayer)
+void Neuron::calcHiddenGradients(const Layer &nextLayer)
 {
 	double dow = sumDOW(nextLayer);
-	gradient = dow * neuron::activationFunctionDerivative(outputVal);
-}
-void neuron::calcOutputGradients(double targetVals)
-{
-	double delta = targetVals - outputVal;
-	gradient = delta * neuron::activationFunctionDerivative(outputVal);
+	gradient = dow * Neuron::activation.getDerivative()(output);
 }
 
-double neuron::activationFunction(double x)
+void Neuron::calcOutputGradients(double target)
+{
+	double delta = target - output;
+	gradient = delta * Neuron::activation.getDerivative()(output);
+}
+
+void Neuron::predict(const Layer &prevLayer)
+{
+	double sum = 0.0;
+
+	for (auto& neuron: prevLayer)
+	{
+		sum += neuron.getOutput() *
+			neuron.outputWeights[index_].weight;
+	}
+
+	output = Neuron::activation.getFunction()(sum);
+}
+
+
+double SigmoidFunction(double x)
+{
+	//output range [-1.0..1.0]
+	return 1 / (1 + exp(-x));
+}
+
+double SigmoidDerivative(double x)
+{
+	double tmp = ::SigmoidFunction(x);
+	return tmp * (1.0 - tmp);
+}
+
+void Activation::setSigmoid()
+{
+	Activation::set(::SigmoidFunction, ::SigmoidDerivative);
+}
+
+double TanhFunction(double x)
 {
 	//output range [-1.0..1.0]
 	return tanh(x);
 }
 
-double neuron::activationFunctionDerivative(double x)
+double TanhDerivative(double x)
 {
 	return 1.0 - x * x;
 }
 
-void neuron::feedForward(const Layer &prevLayer)
+void Activation::setTanh()
 {
-	double sum = 0.0;
-
-	for (unsigned n = 0; n < prevLayer.size(); ++n)
-	{
-		sum += prevLayer[n].getOutputVal() *
-			prevLayer[n].outputWeights[m_myIndex].weight;
-	}
-
-	outputVal = neuron::activationFunction(sum);
+	Activation::set(::TanhFunction, ::TanhDerivative);
 }

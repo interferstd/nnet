@@ -1,11 +1,11 @@
 #include "trainingSet.h"
 
-trainingSet::trainingSet(const std::string filename)
+TrainingSet::TrainingSet(const std::string filename)
 {
 	trainingDataFile.open(filename.c_str());
 }
 
-void trainingSet::getTopology(std::vector<unsigned> &topology)
+void TrainingSet::getTopology(std::vector<unsigned>& topology)
 {
 	std::string line;
 	std::string label;
@@ -13,23 +13,17 @@ void trainingSet::getTopology(std::vector<unsigned> &topology)
 	std::getline(trainingDataFile, line);
 	std::stringstream ss(line);
 	ss >> label;
-	if (this->isEOF() || label.compare("topology:") != 0)
-	{
-		abort();
-	}
-
-	while (!ss.eof())
+	
+	if (!this->isEOF() && label.compare("topology:") == 0)
 	{
 		unsigned n;
-		ss >> n;
-		topology.push_back(n);
-	}
-	return;
+		do { ss >> n; topology.push_back(n); } while (!ss.eof());
+	} else abort();
 }
 
-unsigned trainingSet::getNextInputs(std::vector<double> &inputVals)
+unsigned TrainingSet::getInput(std::vector<double>& input)
 {
-	inputVals.clear();
+	input.clear();
 
 	std::string line;
 	std::getline(trainingDataFile, line);
@@ -37,19 +31,18 @@ unsigned trainingSet::getNextInputs(std::vector<double> &inputVals)
 
 	std::string label;
 	ss >> label;
-	if (label.compare("in:") == 0) {
-		double oneValue;
-		while (ss >> oneValue) {
-			inputVals.push_back(oneValue);
-		}
+	if (label.compare("in:") == 0)
+	{
+		double value;
+		while (ss >> value)	input.push_back(value);
 	}
 
-	return inputVals.size();
+	return input.size();
 }
 
-unsigned trainingSet::getTargetOutputs(std::vector<double> &targetOutputVals)
+unsigned TrainingSet::getTarget(std::vector<double>& target)
 {
-	targetOutputVals.clear();
+	target.clear();
 
 	std::string line;
 	std::getline(trainingDataFile, line);
@@ -57,12 +50,11 @@ unsigned trainingSet::getTargetOutputs(std::vector<double> &targetOutputVals)
 
 	std::string label;
 	ss >> label;
-	if (label.compare("out:") == 0) {
-		double oneValue;
-		while (ss >> oneValue) {
-			targetOutputVals.push_back(oneValue);
-		}
+	if (label.compare("out:") == 0)
+	{
+		double value;
+		while (ss >> value) target.push_back(value);
 	}
 
-	return targetOutputVals.size();
+	return target.size();
 }

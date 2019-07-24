@@ -2,50 +2,52 @@
 #include "neuron.h"
 #include "net.h"
 
-void showVectorVals(std::string label, std::vector<double> &v)
+void showVector(std::string label, std::vector<double> &v)
 {
 	std::cout << label << " ";
 	for (unsigned i = 0; i < v.size(); i++)
 	{
 		std::cout << v[i] << " ";
 	}
-	std::cout << std::endl;
+	std::cout << '\n';
 }
 
 int main()
 {
-	trainingSet trainingData("testData.txt");
-	std::vector<unsigned> topology;
+	TrainingSet trainingData("testData.txt");
+	Topology topology;
 	trainingData.getTopology(topology);
-	net net(topology);
+	Net net(topology);
 
-	std::vector<double> inputVals, targetVals, resultVals;
+	Data input, target, result;
 	int trainingPass = 0;
-	while (!trainingData.isEOF())
+	while (trainingData.getInput(input), !trainingData.isEOF())
 	{
 		++trainingPass;
-		std::cout << std::endl << "Pass: " << trainingPass << std::endl;
+		//std::cout << '\n' << "Pass #" << trainingPass << '\n';
 
-		if (trainingData.getNextInputs(inputVals) != topology[0])
-			break;
-		showVectorVals("Input:", inputVals);
-		net.feedForward(inputVals);
+		assert(input.size() == topology[0]);
+		//showVector("  Input:   ", input);
+		net.predict(input);
 
-		trainingData.getTargetOutputs(targetVals);
-		showVectorVals("Targets:", targetVals);
-		assert(targetVals.size() == topology.back());
+		trainingData.getTarget(target);
+		//showVector("  Targets: ", target);
 
-		net.getResults(resultVals);
-		showVectorVals("Outputs", resultVals);
+		assert(target.size() == topology.back());
+		//net.getRecentResults(result);
+		//showVector("  Outputs: ", result);
 
-		net.backProp(targetVals);
+		net.fit(target);
 
-		std::cout << "Net average error: " << net.getRecentAverageError() << std::endl;
+		//std::cout << "Avg error: " << net.getRecentAvgError() << '\n';
 	}
 
-	std::cout << std::endl << "Done" << std::endl;
+	std::cout << '\n' << "Done" << '\n';
+	std::cout << "Avg error: " << net.getRecentAvgError() << '\n';
+
 #if defined(_MSC_VER) || defined(_WIN32)
-	system("PAUSE");
+	//system("PAUSE");
 #endif
+
 	return(0);
 }
