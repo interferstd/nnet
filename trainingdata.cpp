@@ -2,7 +2,7 @@
 
 TrainingData::TrainingData(const std::string filename)
 {
-	trainingDataFile.open(filename.c_str());
+	trainingDataFile.open((filename+".data").c_str());
 }
 
 void TrainingData::getTopology(Topology& topology)

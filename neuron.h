@@ -23,8 +23,8 @@ public:
 		Activation::setTanh();
 	}
 	void set(Function function, Function derivative) { function_ = function; derivative_ = derivative; }
-	inline Function getFunction() const { return function_; }
-	inline Function getDerivative() const { return derivative_; }
+	inline const Function& getFunction() { return function_; }
+	inline const Function& getDerivative() { return derivative_; }
 	void setSigmoid();
 	void setTanh();
 private:
@@ -44,11 +44,13 @@ public:
 	void updateInputWeights(Layer &prevLayer);
 	void setDump(std::fstream& dumpFile);
 	void getDump(std::fstream& loadFile);
+	static void setLearnRate(double learningRate = 0.15) { learning_rate = learningRate; }
+	static void setAlpha(double newAlpha = 0.5) { alpha = newAlpha; }
+	static Activation activation;
 private:
 	static double learning_rate;
 	static double alpha;
 	static double randomWeight() { return std::rand() / double(RAND_MAX); }
-	static Activation activation;
 	double sumDOW(const Layer &nextLayer) const;
 	double output;
 	std::vector<Connection> outputWeights;

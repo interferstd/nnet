@@ -10,7 +10,7 @@ Net::Net(const Topology& topology)
 {
 	unsigned numLayers = topology.size();
 	layers.reserve(numLayers);
-	
+
 	for (unsigned layerIndex = 0; layerIndex < numLayers; ++layerIndex)
 	{
 		layers.push_back(Layer());
@@ -27,7 +27,7 @@ Net::Net(const Topology& topology)
 	}
 }
 
-void Net::getRecentResults(Data& result) const
+void Net::getRecentResults(Data& result)
 {
 	result.clear();
 	result.reserve(layers.back().size());
@@ -107,7 +107,7 @@ void Net::fit(const Data& input, const Data& target)
 
 unsigned Net::setDump(std::string name)
 {
-	std::fstream dumpFile(name, std::ios::out);
+	std::fstream dumpFile(name+=".nnet", std::ios::out);
 	if (!dumpFile.is_open()) return false;
 	dumpFile.precision(16);
 	dumpFile << layers.size() << '\n';
@@ -122,7 +122,7 @@ unsigned Net::setDump(std::string name)
 
 unsigned Net::getDump(std::string name)
 {
-	std::fstream loadFile(name, std::ios::in);
+	std::fstream loadFile(name+=".nnet", std::ios::in);
 	if (!loadFile.is_open()) return false;
 	unsigned lenght;
 	loadFile >> lenght;
